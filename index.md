@@ -305,139 +305,148 @@ We will use this <a href="{{ page.collaborative_notes }}">collaborative document
 {% endif %}
 
 
-{% comment %}
-SURVEYS - DO NOT EDIT SURVEY LINKS
-{% endcomment %}
-<h2 id="surveys">Surveys</h2>
-<p>Please be sure to complete these surveys before and after the workshop.</p>
-{% if site.carpentry == "incubator" %}
-<p><a href="{{ site.incubator_pre_survey }}">Pre-workshop Survey</a></p>
-<p><a href="{{ site.incubator_post_survey }}">Post-workshop Survey</a></p>
-{% elsif site.incubator_pre_survey or site.incubator_post_survey %}
-<div class="alert alert-danger">
-WARNING: you have defined custom pre- and/or post-survey links for
-a workshop not configured for The Carpentries Incubator
-(the value of `curriculum` is not set to `incubator` in `_config.yml`).
-Please comment out the `incubator_pre_survey` and `incubator_post_survey` fields
-in `_config.yml` or, if this workshop is teaching a lesson in the Incubator,
-change the value of `carpentry` to `incubator`.
-</div>
-{% else %}
-<p><a href="{{ site.pre_survey }}{{ site.github.project_title }}">Pre-workshop Survey</a></p>
-<p><a href="{{ site.post_survey }}{{ site.github.project_title }}">Post-workshop Survey</a></p>
-{% endif %}
+# Setup
 
-<hr/>
+The following commands are tested on the LPC cluster, using the bash shell.
+You can run `echo "$SHELL"` to check that you are indeed running bash.
+Add the following lines to your `~/.bash_profile` file
+~~~bash
+export CDGPATH=${HOME}/nobackup/cmsdas_2023_gen
+source /cvmfs/cms.cern.ch/cmsset_default.sh
+~~~
+{: .source}
+Run `bash -l` to restart bash, or alternatively `source ~/.bash_profile` to activate your change. You don't need to rerun this command next time you re-login to the LPC cluster.
+
+We start with pulling and installing the required CMS software (CMSSW).
+We use two versions: the older 10.6.19 is used for sample generation,
+while we will make use of the more up-to-date tools installed in 12.4.7 when we analyze the samples.
+~~~bash
+mkdir -p ${CDGPATH}
+
+cd ${CDGPATH}
+cmsrel CMSSW_10_6_19
+cmsrel CMSSW_12_4_7
+~~~
+{: .source}
+
+Downloading MadGraph5 v2.6.5 from a CMS mirror, which is the MG version that is currently used in CMS for Run 2 Ultra Legacy and Run 3 samples.
+~~~bash
+wget https://cms-project-generators.web.cern.ch/cms-project-generators/MG5_aMC_v2.6.5.tar.gz
+tar xf MG5_aMC_v2.6.5.tar.gz
+rm MG5_aMC_v2.6.5.tar.gz
+~~~
+{: .source}
+
+Cloning the CMS generator repository:
+~~~bash
+git clone -b mg265UL https://github.com/cms-sw/genproductions.git genproductions_mg265
+~~~
+{: .source}
+
+You can check that the MadGraph steering cards of the example we will be using are actually there:
+~~~bash
+ls -rtl genproductions/bin/MadGraph5_aMCatNLO/cards/examples/wplustest_4f_LO/
+~~~
+{: .source}
+
+~~~
+total 20
+-rw-r--r-- 1 dspitzba us_cms   223 Dec 21 08:10 wplustest_4f_LO_proc_card.dat
+-rw-r--r-- 1 dspitzba us_cms 15996 Dec 21 08:10 wplustest_4f_LO_run_card.dat
+~~~
+{: .output}
+
+# Using MadGraph
+
+## Standalone
+
+## The CMS gridpack workflow
+
+Instructions for gridpack generation go here
+
+> ## Producing a gridpack
+>
+> Pull the image python:3.7-slim for Python 3.7 and then list all `python` images along with the `sl:7` image
+>
+> > ## Solution
+> >
+> > ~~~bash
+> > docker pull python:3.7-slim
+> > docker images --filter=reference="sl" --filter=reference="python"
+> > ~~~
+> > {: .source}
+> >
+> > ~~~
+> > 
+> > ~~~
+> > {: .output}
+> {: .solution}
+{: .challenge}
+
+## Inspecting the LHE file
+
+--> show how to do this in standalone
+
+# Parton Shower and Sample generation
 
 
-{% comment %}
-SCHEDULE
+## Showering LHE event
 
-Show the workshop's schedule.
+Use the lhe file to shower using a cmsDriver cfg
 
-Small changes to the schedule can be made by modifying the
-`schedule.html` found in the `_includes` folder for your
-workshop type (`swc`, `lc`, or `dc`). Edit the items and
-times in the table to match your plans. You may also want to
-change 'Day 1' and 'Day 2' to be actual dates or days of the
-week.
+## Determining qcut
 
-For larger changes, a blank template for a 4-day workshop
-(useful for online teaching for instance) can be found in
-`_includes/custom-schedule.html`. Add the times, and what
-you will be teaching to this file. You may also want to add
-rows to the table if you wish to break down the schedule
-further. To use this custom schedule here, replace the block
-of code below the Schedule `<h2>` header below with
-`{% include custom-schedule.html %}`.
-{% endcomment %}
+Keep this exercise?
 
-<h2 id="schedule">Schedule</h2>
+## Creating NanoGEN
 
-{% if site.carpentry == "swc" %}
-{% include swc/schedule.html %}
-{% elsif site.carpentry == "dc" %}
-{% include dc/schedule.html %}
-{% elsif site.carpentry == "lc" %}
-{% include lc/schedule.html %}
-{% elsif site.carpentry == "incubator" %}
-This workshop is teaching a lesson in [The Carpentries Incubator](https://carpentries-incubator.org/).
-Please check [the lesson homepage]({{ site.incubator_lesson_site }}) for a list of lesson sections and estimated timings.
-{% endif %}
+In the following steps we will use a pre-made gridpack: `/eos/uscms/store/user/cmsdas/2023/short_exercises/Generators/WJetsToLNu_HT-0toInf_slc7_amd64_gcc700_CMSSW_10_6_19_tarball.tar.xz`
 
-{% comment %}
-Edit/replace the text above if you want to include a schedule table.
-See the contents of the _includes/custom-schedule.html file for an example of
-how one of these schedule tables is constructed.
-{% endcomment %}
+Copy fragment from repo.
 
-{% if site.pilot %}
-The lesson taught in this workshop is being piloted and a precise schedule is yet to be established. The workshop will include regular breaks. Please [contact the workshop organisers](#contact) if you would like more information about the planned schedule.
-{% endif %}
+~~~bash
+cd ${CDGPATH}/CMSSW_10_6_19/src
+cmsenv
+mkdir -p Configuration/GenProduction/python/
+cp ${CDGPATH}/gen-cmsdas-2022/fragments/Hadronizer_TuneCP5_13TeV_MLM_5f_max2j_qCut10_LHE_pythia8_cff.py Configuration/GenProduction/python/
+scram b -j 8
+~~~
+{: .source}
 
-<hr/>
+What is the qcut we are using here?
+
+Run cmsDriver to create a cmsRun configuration file:
+~~~bash
+cmsDriver.py Configuration/GenProduction/python/Hadronizer_TuneCP5_13TeV_MLM_5f_max2j_qCut10_LHE_pythia8_cff.py --python_filename nanoGEN_cfg.py --eventcontent NANOAODGEN --customise Configuration/DataProcessing/Utils.addMonitoring --datatier NANOAOD --fileout file:NanoGEN.root --conditions auto:mc --beamspot Realistic25ns13TeVEarly2018Collision --step LHE,GEN,NANOGEN --geometry DB:Extended --era Run2_2018 --no_exec --mc -n 1000
+~~~
+{: .source}
+
+Run cmsRun
+~~~bash
+cmsRun nanoGEN_cfg.py
+~~~
+{: .source}
+
+Produces a flat ntuple ready for simple data analysis, following the same structure as a full-fledged NanoAOD with just generator information.
+
+Provide a larger sample for later plots?
 
 
-{% comment %}
-SETUP
+# Analysis
 
-Delete irrelevant sections from the setup instructions.  Each
-section is inside a 'div' without any classes to make the beginning
-and end easier to find.
+## Generator level distributions from NanoGEN
 
-This is the other place where people frequently make mistakes, so
-please preview your site before committing, and make sure to run
-'tools/check' as well.
-{% endcomment %}
+Calculate transverse mass from GenDressedLepton and GenMET
+~~~bash
+cd ${CDGPATH}/CMSSW_12_4_7/src; cmsenv; cd ${CDGPATH}/gen-cmsdas-2022
+python analysis/plot_mt.py
+~~~
+{: .source}
 
-<h2 id="setup">Setup</h2>
+## Systematic Uncertainties related to generators
 
-<p>
-  To participate in a
-  {% if site.carpentry == "swc" %}
-  Software Carpentry
-  {% elsif site.carpentry == "dc" %}
-  Data Carpentry
-  {% elsif site.carpentry == "lc" %}
-  Library Carpentry
-  {% endif %}
-  workshop,
-  you will need access to software as described below.
-  In addition, you will need an up-to-date web browser.
-</p>
-<p>
-  We maintain a list of common issues that occur during installation as a reference for instructors
-  that may be useful on the
-  <a href = "{{site.swc_github}}/workshop-template/wiki/Configuration-Problems-and-Solutions">Configuration Problems and Solutions wiki page</a>.
-</p>
 
-{% comment %}
-For online workshops, the section below provides:
-- installation instructions for the Zoom client
-- recommendations for setting up Learners' workspace so they can follow along
-  the instructions and the videoconferencing
+# CMS Tools
 
-If you do not use Zoom for your online workshop, edit the file
-`_includes/install_instructions/videoconferencing.html`
-to include the relevant installation instructions.
-{% endcomment %}
-{% if online != "false" %}
-{% include install_instructions/videoconferencing.html %}
-{% endif %}
+McM, x-sec DB, DAS, GRASP
 
-{% comment %}
-These are the installation instructions for the tools used
-during the workshop.
-{% endcomment %}
-
-{% if site.carpentry == "swc" %}
-{% include swc/setup.html %}
-{% elsif site.carpentry == "dc" %}
-{% include dc/setup.html %}
-{% elsif site.carpentry == "lc" %}
-{% include lc/setup.html %}
-{% elsif site.carpentry == "incubator" %}
-Please check the "Setup" page of
-[the lesson site]({{ site.incubator_lesson_site }}) for instructions to follow
-to obtain the software and data you will need to follow the lesson.
-{% endif %}
